@@ -4,7 +4,7 @@ namespace Doctrine\Common\Tester;
 
 use Symfony\Component\ClassLoader\UniversalClassLoader;
 
-use Doctrine\ORM\Mapping\Driver\XmlDriver;
+use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\DriverChain;
@@ -39,11 +39,13 @@ class Tester
     protected $basepathes = array();
     
     protected $connectionParams = array();
+
+    protected $mappingTypes = array();
     
     public function __construct()
     {
         //assume the lib in vendor/doctrine-tester dir
-        $this->registerBasepath($srcPath = __DIR__ . '/../../');
+        //$this->registerBasepath($srcPath = __DIR__ . '/../../');
         
         $this->useSqlite();
     }
@@ -89,6 +91,13 @@ class Tester
         
         return $this;
     }
+
+    public function registerMappingType($dbType, $doctrineType)
+    {
+        $this->mappingTypes[$dbType] = $doctrineType;
+
+        return $this;
+    }
     
     /**
      *
@@ -118,8 +127,16 @@ class Tester
                 Type::addType($name, $class);
             }
         }
-        
-        return EntityManager::create($this->connectionParams, $conf);
+
+        $entityManager = EntityManager::create($this->connectionParams, $conf);
+        if (!empty($this->mappingTypes)) {
+            $platform = $entityManager->getConnection()->getDatabasePlatform();
+            foreach ($this->mappingTypes as $dbType => $doctrineType) {
+                $platform->registerDoctrineTypeMapping($dbType, $doctrineType);
+            }
+        }
+
+        return $entityManager;
     }
     
     public function useSqlite()
@@ -169,16 +186,16 @@ class Tester
         }
 
         if ($this->xmlMapping) {
+            $pathes = array();
             foreach ($this->xmlMapping as $namespace => $path) {
-                $path = $this->guessPath($path);
-                
-                $xd = new XmlDriver(array($path));
-                $xd->setGlobalBasename(array('mapping'));
-                $xd->setNamespacePrefixes(array($path => $namespace));
-                
-                $chainDriver->addDriver($xd, $namespace);
+                $pathes[$this->guessPath($path)] = $namespace;
             }
-            
+
+            $xmlDriver = new SimplifiedXmlDriver($pathes);
+            $xmlDriver->setGlobalBasename('mapping');
+            foreach ($this->xmlMapping as $namespace => $path) {
+                $chainDriver->addDriver($xmlDriver, $namespace);
+            }
         }
         
         return $chainDriver;
@@ -262,6 +279,17 @@ class Tester
         $this->fixtureManager()->clean();
         
         return $this;
+    }
+
+    /**
+         *
+         * @return Doctrine\ORM\EntityRepository
+         */
+    public function repository($entity)
+    {
+        is_object($entity) && $entity = get_class($entity);
+
+        return $this->em()->getRepository($entity);
     }
     
     public function get($referance)
