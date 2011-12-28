@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit backupGlobals="false"
+         backupStaticAttributes="false"
+         colors="false"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         processIsolation="false"
+         stopOnFailure="false"
+         syntaxCheck="false"
+         bootstrap="tests/bootstrap.php"
+>
+    <testsuites>
+        <testsuite name="Doctrine Tester Tests">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <server name="mysql_db_name" value="doctrine-tester"/>
+        <server name="mysql_db_username" value="dev"/>
+        <server name="mysql_db_password" value="dev"/>
+    </php>
+</phpunit>
