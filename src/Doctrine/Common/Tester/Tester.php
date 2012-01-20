@@ -121,6 +121,7 @@ class Tester
         $conf->setMetadataDriverImpl($this->initMetadataDriverImpl());
         $conf->setQueryCacheImpl(new ArrayCache());
         $conf->setMetadataCacheImpl(new ArrayCache());
+        $conf->setClassMetadataFactoryName('Doctrine\Common\Tester\PartialClassMetadataFactory');
         
         foreach ($this->dbalTypes as $name => $class) {
             if (false == Type::hasType($name)) {
@@ -134,6 +135,11 @@ class Tester
             foreach ($this->mappingTypes as $dbType => $doctrineType) {
                 $platform->registerDoctrineTypeMapping($dbType, $doctrineType);
             }
+        }
+
+
+        if ($this->entitiesName) {
+            $entityManager->getMetadataFactory()->setUseOnlyClasses($this->entitiesName);
         }
 
         return $entityManager;
@@ -238,28 +244,12 @@ class Tester
     
     public function rebuild()
     {
-        $em = $this->em();        
+        $em = $this->em();
 
-        $classes = array();
-        if ($this->entitiesName) {
-            foreach ($this->entitiesName as $class) {
-                $classes[] = $em->getClassMetadata($class);
+        $classes = $em->getMetadataFactory()->getAllMetadata();
 
-                foreach ($classes as $class) {
-                    foreach ($class->associationMappings as $fieldName => $mapping) {
-                        if (false === array_search($mapping['targetEntity'], $this->entitiesName, false)) {
-                            unset($class->associationMappings[$fieldName]);
-                            unset($class->reflFields[$fieldName]);
-                        }
-                    }
-                }
-            }
-        } else {
-            $classes = $em->getMetadataFactory()->getAllMetadata();
-        }
-        
         $schemaTool = new SchemaTool($em);
-        $schemaTool->dropSchema($classes);
+        $schemaTool->dropDatabase();
         $schemaTool->createSchema($classes);
         
         $em->clear();
