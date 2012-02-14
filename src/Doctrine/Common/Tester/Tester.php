@@ -27,6 +27,8 @@ class Tester
     protected $xmlMapping = array();
 
     protected $em;
+
+    protected $snapshot;
     
     protected $entitiesName = array();
     
@@ -110,6 +112,19 @@ class Tester
         }
         
         return $this->em;
+    }
+
+    /**
+     *
+     * @return Snapshot
+     */
+    public function snapshot()
+    {
+        if (false == $this->snapshot) {
+            $this->snapshot = new Snapshot($this->em());
+        }
+
+        return $this->snapshot;
     }
     
     protected function initEm()
