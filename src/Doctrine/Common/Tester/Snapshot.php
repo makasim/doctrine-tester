@@ -31,13 +31,16 @@ class Snapshot
         $this->disableConstraints();
 
         $query = $this->getTables();
+        $queriesToExec = array();
         while($table = $query->fetchColumn()) {
             if (strpos($table, $this->getSnaphotTablePrefix()) !== false) continue;
 
             $snapshop_table = "{$this->getSnaphotTablePrefix()}_{$snapshotName}__{$table}";
-            $this->exec("TRUNCATE TABLE {$table}");
-            $this->exec("INSERT INTO {$table} SELECT * FROM {$snapshop_table}");
+            $queriesToExec[] = "TRUNCATE TABLE {$table}";
+            $queriesToExec[] = "INSERT INTO {$table} SELECT * FROM {$snapshop_table}";
         }
+
+        $this->exec(implode('; ', $queriesToExec));
 
         $this->enableConstraints();
     }
