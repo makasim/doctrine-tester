@@ -33,7 +33,7 @@ class Tester
 
     protected $fixtureManager;
 
-    protected $referanceRepository;
+    protected $referenceRepository;
     
     protected $entitiesName = array();
     
@@ -217,7 +217,7 @@ class Tester
 
     protected function initFixtureManager()
     {
-        return new FixtureManager($this->em(), $this->referanceRepository());
+        return new FixtureManager($this->em(), $this->referenceRepository());
     }
 
     /**
@@ -232,24 +232,24 @@ class Tester
         return $this->fixtureManager;
     }
 
-    public function referanceRepository()
+    public function referenceRepository()
     {
-        if (false == $this->referanceRepository) {
-            $this->referanceRepository = $this->initReferanceRepository();
+        if (false == $this->referenceRepository) {
+            $this->referenceRepository = $this->initReferenceRepository();
         }
 
-        return $this->referanceRepository;
+        return $this->referenceRepository;
     }
 
-    protected function initReferanceRepository()
+    protected function initReferenceRepository()
     {
         return new ReferenceRepository($this->em());
     }
 
-    public function renewReferanceRepository()
+    public function renewReferenceRepository()
     {
-        $this->referanceRepository = null;
-        $this->referanceRepository();
+        $this->referenceRepository = null;
+        $this->referenceRepository();
     }
     
     protected function guessPath($originalPath)
@@ -291,8 +291,8 @@ class Tester
         return $this->em()->getRepository($entity);
     }
 
-    public function get($referanceName)
+    public function get($referenceName)
     {
-        return $this->referanceRepository()->getReference($referanceName);
+        return $this->referenceRepository()->getReference($referenceName);
     }
 }

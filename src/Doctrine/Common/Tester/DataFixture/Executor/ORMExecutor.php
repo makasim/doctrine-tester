@@ -8,13 +8,13 @@ use Doctrine\ORM\EntityManager;
 
 class ORMExecutor extends BaseORMExecutor
 {
-    public function __construct(EntityManager $em, ORMPurger $purger = null, ReferenceRepository $referanceRepository = null)
+    public function __construct(EntityManager $em, ORMPurger $purger = null, ReferenceRepository $referenceRepository = null)
     {
         parent::__construct($em, $purger);
 
         // there should be a way to set it from outside
-        if ($referanceRepository) {
-            $this->referenceRepository = $referanceRepository;
+        if ($referenceRepository) {
+            $this->referenceRepository = $referenceRepository;
         }
     }
 }

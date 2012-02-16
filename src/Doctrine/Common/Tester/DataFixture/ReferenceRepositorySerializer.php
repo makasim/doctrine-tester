@@ -6,7 +6,7 @@ use Doctrine\ORM\EntityManager;
 
 use Doctrine\ORM\Proxy\Proxy;
 
-class ReferanceRepositorySerializer
+class ReferenceRepositorySerializer
 {
     private $manager;
 
@@ -16,23 +16,23 @@ class ReferanceRepositorySerializer
     }
 
     /**
-     * @param \Doctrine\Common\DataFixtures\ReferenceRepository $referanceRepository
+     * @param \Doctrine\Common\DataFixtures\ReferenceRepository $referenceRepository
      *
      * @return string
      */
-    public function serialize(ReferenceRepository $referanceRepository)
+    public function serialize(ReferenceRepository $referenceRepository)
     {
         $toSerialize = array();
-        foreach($referanceRepository->getReferences() as $name => $referance) {
-            $referance = $referanceRepository->getReference($name);
+        foreach($referenceRepository->getReferences() as $name => $reference) {
+            $reference = $referenceRepository->getReference($name);
 
-            $toSerialize[$name]['identifier'] = $this->manager->getUnitOfWork()->getEntityIdentifier($referance);
+            $toSerialize[$name]['identifier'] = $this->manager->getUnitOfWork()->getEntityIdentifier($reference);
 
-            if ($referance instanceof Proxy) {
-                $ro = new \ReflectionObject($referance);
+            if ($reference instanceof Proxy) {
+                $ro = new \ReflectionObject($reference);
                 $toSerialize[$name]['class'] = $ro->getParentClass()->getName();
             } else {
-                $toSerialize[$name]['class'] =  get_class($referance);
+                $toSerialize[$name]['class'] =  get_class($reference);
             }
         }
 
@@ -52,7 +52,7 @@ class ReferanceRepositorySerializer
         );
     }
 
-    public function fill(ReferenceRepository $referanceRepository, array $unserializedData)
+    public function fill(ReferenceRepository $referenceRepository, array $unserializedData)
     {
         foreach ($unserializedData as $name => $data) {
             $reference = $this->manager->getReference(
@@ -60,9 +60,9 @@ class ReferanceRepositorySerializer
                 $data['identifier']
             );
 
-            $referanceRepository->setReference($name, $reference);
+            $referenceRepository->setReference($name, $reference);
         }
 
-        return $referanceRepository;
+        return $referenceRepository;
     }
 }

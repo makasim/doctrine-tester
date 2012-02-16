@@ -16,28 +16,28 @@ class FixtureManager
     
     protected $executor;
 
-    protected $referanceRepository;
+    protected $referenceRepository;
 
-    public function __construct(EntityManager $em, ReferenceRepository $referanceRepository = null)
+    public function __construct(EntityManager $em, ReferenceRepository $referenceRepository = null)
     {
         $this->em = $em;
         $this->executor = new ORMExecutor(
             $this->em,
             new ORMPurger($this->em),
-            $referanceRepository
+            $referenceRepository
         );
     }
 
     /**
      * @return \Doctrine\Common\DataFixtures\ReferenceRepository
      */
-    public function referanceRepository()
+    public function referenceRepository()
     {
         return $this->executor->getReferenceRepository();
     }
 
-    public function get($referance)
+    public function get($reference)
     {
-        return $this->executor->getReferenceRepository()->getReference($referance);
+        return $this->executor->getReferenceRepository()->getReference($reference);
     }
 }
