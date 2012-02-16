@@ -5,58 +5,35 @@ use Doctrine\ORM\EntityManager;
 
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Common\DataFixtures\Loader;
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\Common\DataFixtures\ReferenceRepository;
 
-use Exception;
+use Doctrine\Common\Tester\DataFixture\Executor\ORMExecutor;
 
 class FixtureManager
 {
     protected $em;
     
-    protected $fixtures = array();
-    
     protected $executor;
 
-    public function __construct(EntityManager $em)
+    protected $referanceRepository;
+
+    public function __construct(EntityManager $em, ReferenceRepository $referanceRepository = null)
     {
         $this->em = $em;
-        $this->executor = new ORMExecutor($this->em, new ORMPurger($this->em));
+        $this->executor = new ORMExecutor(
+            $this->em,
+            new ORMPurger($this->em),
+            $referanceRepository
+        );
     }
-    
-    public function registerFixture($name, AbstractFixture $fixture)
+
+    /**
+     * @return \Doctrine\Common\DataFixtures\ReferenceRepository
+     */
+    public function referanceRepository()
     {
-        $this->fixtures[$name] = $fixture;
-    }
-
-    public function load($names)
-    {
-        is_array($names) || $names = array($names);
-
-        $loader = new Loader();
-        foreach ($names as $name) {
-            if (false == isset($this->fixtures[$name])) {
-                throw new Exception('A fixture with name `'.$name.'` was not registerd');
-            }
-            
-            $loader->addFixture($this->fixtures[$name]);
-        }
-        
-        $this->executor->execute($loader->getFixtures(), true);
-
-        return $this;
-    }
-    
-    public function clean()
-    {
-        $purger = new ORMPurger($this->em);
-        $purger->purge();
-        
-        $this->executor = new ORMExecutor($this->em, $purger);
-        
-        $this->em->clear();
-
-        return $this;
+        return $this->executor->getReferenceRepository();
     }
 
     public function get($referance)

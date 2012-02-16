@@ -15,6 +15,7 @@ use Doctrine\Common\Cache\ArrayCache;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\IndexedReader;
 use Doctrine\Common\Annotations\CachedReader;
+use Doctrine\Common\DataFixtures\ReferenceRepository;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
@@ -29,12 +30,12 @@ class Tester
     protected $em;
 
     protected $snapshot;
+
+    protected $fixtureManager;
+
+    protected $referanceRepository;
     
     protected $entitiesName = array();
-    
-    protected $fixtures = array();
-    
-    protected $fixtureManager = array();
     
     protected $dbalTypes = array();
     
@@ -46,22 +47,12 @@ class Tester
     
     public function __construct()
     {
-        //assume the lib in vendor/doctrine-tester dir
-        //$this->registerBasepath($srcPath = __DIR__ . '/../../');
-        
         $this->useSqlite();
     }
     
     public function registerBasepath($path)
     {
         $this->basepathes[] = realpath($path);
-        
-        return $this;
-    }
-    
-    public function registerFixtures(array $fixtures)
-    {
-        $this->fixtures = $fixtures;
         
         return $this;
     }
@@ -223,25 +214,42 @@ class Tester
     }
 
 
-    
+
     protected function initFixtureManager()
     {
-        $fixtureManager = new FixtureManager($this->em());
-        
-        foreach ($this->fixtures as $name => $fixture) {
-            $fixtureManager->registerFixture($name, $fixture);
-        }
-        
-        return $fixtureManager;
+        return new FixtureManager($this->em(), $this->referanceRepository());
     }
-    
-    protected function fixtureManager()
+
+    /**
+     * @return FixtureManager
+     */
+    public function fixtureManager()
     {
         if (false == $this->fixtureManager) {
             $this->fixtureManager = $this->initFixtureManager();
         }
         
         return $this->fixtureManager;
+    }
+
+    public function referanceRepository()
+    {
+        if (false == $this->referanceRepository) {
+            $this->referanceRepository = $this->initReferanceRepository();
+        }
+
+        return $this->referanceRepository;
+    }
+
+    protected function initReferanceRepository()
+    {
+        return new ReferenceRepository($this->em());
+    }
+
+    public function renewReferanceRepository()
+    {
+        $this->referanceRepository = null;
+        $this->referanceRepository();
     }
     
     protected function guessPath($originalPath)
@@ -272,20 +280,6 @@ class Tester
         return $this;
     }
     
-    public function load(array $fixtures)
-    {
-        $this->fixtureManager()->load($fixtures);
-        
-        return $this;
-    }
-    
-    public function clean()
-    {
-        $this->fixtureManager()->clean();
-        
-        return $this;
-    }
-
     /**
          *
          * @return Doctrine\ORM\EntityRepository
@@ -296,9 +290,9 @@ class Tester
 
         return $this->em()->getRepository($entity);
     }
-    
-    public function get($referance)
+
+    public function get($referanceName)
     {
-        return $this->fixtureManager()->get($referance);
+        return $this->referanceRepository()->getReference($referanceName);
     }
 }
