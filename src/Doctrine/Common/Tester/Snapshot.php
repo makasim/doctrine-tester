@@ -28,21 +28,21 @@ class Snapshot
 
     public function load($snapshotName)
     {
-        $this->disableConstraints();
-
         $query = $this->getTables();
         $queriesToExec = array();
+        
+        $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 0";
         while($table = $query->fetchColumn()) {
             if (strpos($table, $this->getSnaphotTablePrefix()) !== false) continue;
-
+        
             $snapshop_table = "{$this->getSnaphotTablePrefix()}_{$snapshotName}__{$table}";
             $queriesToExec[] = "TRUNCATE TABLE {$table}";
-            $queriesToExec[] = "INSERT INTO {$table} SELECT * FROM {$snapshop_table}";
+            $queriesToExec[] = "INSERT HIGH_PRIORITY INTO {$table} SELECT * FROM {$snapshop_table}";
         }
 
+        $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 1";
+        
         $this->exec(implode('; ', $queriesToExec));
-
-        $this->enableConstraints();
     }
 
     public function removeAll()
@@ -65,16 +65,6 @@ class Snapshot
     protected function getTables()
     {
         return $this->query("SHOW TABLES");
-    }
-
-    protected function disableConstraints()
-    {
-        $this->exec("SET FOREIGN_KEY_CHECKS = 0;");
-    }
-
-    protected function enableConstraints()
-    {
-        $this->exec("SET FOREIGN_KEY_CHECKS = 1;");
     }
 
     protected function exec($query)
