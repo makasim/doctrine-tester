@@ -32,17 +32,47 @@ class Snapshot
         $queriesToExec = array();
         
         $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 0";
+        $queriesToExec[] += $this->truncateQueries();
         while($table = $query->fetchColumn()) {
             if (strpos($table, $this->getSnaphotTablePrefix()) !== false) continue;
         
             $snapshop_table = "{$this->getSnaphotTablePrefix()}_{$snapshotName}__{$table}";
-            $queriesToExec[] = "TRUNCATE TABLE {$table}";
             $queriesToExec[] = "INSERT HIGH_PRIORITY INTO {$table} SELECT * FROM {$snapshop_table}";
         }
 
         $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 1";
         
         $this->exec(implode('; ', $queriesToExec));
+    }
+    
+    /**
+     * @return void
+     */
+    public function truncate()
+    {
+        $queriesToExec = array();
+        $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 0";
+        $queriesToExec += $this->truncateQueries();
+        $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 1";
+
+        $this->exec(implode('; ', $queriesToExec));
+    }
+    
+    /**
+     * @return array
+     */
+    protected function truncateQueries()
+    {
+        $query = $this->getTables();
+        
+        $queriesToExec = array();
+        while($table = $query->fetchColumn()) {
+            if (strpos($table, $this->getSnaphotTablePrefix()) !== false) continue;
+
+            $queriesToExec[] = "TRUNCATE TABLE {$table}";
+        }
+        
+        return $queriesToExec;
     }
 
     public function removeAll()
