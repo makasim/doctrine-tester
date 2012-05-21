@@ -26,13 +26,16 @@ class Snapshot
         return $this;
     }
 
-    public function load($snapshotName)
+    public function load($snapshotName, $append = false)
     {
         $query = $this->getTables();
         $queriesToExec = array();
         
         $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 0";
-        $queriesToExec[] += $this->truncateQueries();
+        
+        if (false == $append) {
+            $queriesToExec = array_merge($queriesToExec, $this->truncateQueries());
+        }
         while($table = $query->fetchColumn()) {
             if (strpos($table, $this->getSnaphotTablePrefix()) !== false) continue;
         
@@ -52,7 +55,7 @@ class Snapshot
     {
         $queriesToExec = array();
         $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 0";
-        $queriesToExec += $this->truncateQueries();
+        $queriesToExec = array_merge($queriesToExec, $this->truncateQueries());
         $queriesToExec[] = "SET FOREIGN_KEY_CHECKS = 1";
 
         $this->exec(implode('; ', $queriesToExec));
