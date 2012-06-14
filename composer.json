@@ -12,6 +12,5 @@
         "psr-0": {
             "Doctrine\\Common\\Tester": "src/"
         }
-    },
-    "target-dir": "Doctrine/Common/Tester"
+    }
 }
