@@ -1,5 +1,5 @@
 {
-    "name": "doctrine/tester",
+    "name": "makasim/doctrine-tester",
     "type": "library",
     "require": {
         "php": ">=5.3.2"
@@ -10,8 +10,7 @@
     },
     "autoload": {
         "psr-0": {
-            "Doctrine\\Common\\Tester": "src/",
-            "Doctrine\\Tests\\Common\\Tester": "tests/"
+            "Doctrine\\Common\\Tester": "src/"
         }
     },
     "target-dir": "Doctrine/Common/Tester"
