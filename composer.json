@@ -5,8 +5,8 @@
         "php": ">=5.3.2"
     },
     "recommend": {
-        "doctrine/orm": "master-dev",
-        "doctrine/data-fixtures": "master-dev"
+        "doctrine/orm": "dev-master",
+        "doctrine/data-fixtures": "dev-master"
     },
     "autoload": {
         "psr-0": {
