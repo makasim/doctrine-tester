@@ -165,14 +165,14 @@ class Tester
         return $this;
     }
     
-    public function useMysql($dbname, $user, $pass)
+    public function useMysql($dbname, $user, $pass, $host = 'localhost')
     {
         $this->connectionParams = array(
             'driver' => 'pdo_mysql',
             'dbname' => $dbname,
             'user' => $user,
             'password' => $pass,
-            'host' => 'localhost',
+            'host' => $host,
             'charset' => "utf8");
         
         return $this;
