@@ -186,13 +186,12 @@ class Tester
             $rc = new \ReflectionClass('\Doctrine\ORM\Mapping\Driver\AnnotationDriver');
             AnnotationRegistry::registerFile(dirname($rc->getFileName()) . '/DoctrineAnnotations.php');
 
-            $pathes = array();
-            foreach ($this->annotationMapping as $path) {
-                $pathes[] = $this->guessPath($path);
-            }
-
-            $annotationDriver = new AnnotationDriver(new AnnotationReader(), $pathes);
             foreach ($this->annotationMapping as $namespace => $path) {
+                $path = $this->guessPath($path);
+
+                $annotationDriver = new AnnotationDriver(new AnnotationReader(), array(
+                    $path
+                ));
                 $chainDriver->addDriver($annotationDriver, $namespace);
             }
         }
