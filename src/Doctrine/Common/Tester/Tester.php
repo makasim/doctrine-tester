@@ -1,10 +1,5 @@
-
-
 <?php
-
 namespace Doctrine\Common\Tester;
-
-use Symfony\Component\ClassLoader\UniversalClassLoader;
 
 use Doctrine\ORM\Mapping\Driver\SimplifiedXmlDriver;
 use Doctrine\ORM\Configuration;
@@ -18,11 +13,8 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Annotations\IndexedReader;
 use Doctrine\Common\Annotations\CachedReader;
 use Doctrine\Common\DataFixtures\ReferenceRepository;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
-
 use Doctrine\DBAL\Types\Type;
-use Doctrine\Common\Tester\DataFixture\ReferenceRepositorySerializer;
 
 class Tester
 {    
@@ -242,17 +234,17 @@ class Tester
     protected function referenceRepository()
     {
         if (false == $this->referenceRepository) {
-            $this->initReferenceRepository();
+            $this->referenceRepository = new ReferenceRepository($this->em);
         }
 
         return $this->referenceRepository;
     }
 
-    protected function initReferenceRepository()
-    {
-        $this->referenceRepository = new ReferenceRepository($this->em);
-    }
-
+    /**
+     * It is the data created by ReferenceRepositorySerializer::serialize()
+     * 
+     * @param array $data
+     */
     public function setReferenceRepositoryData(array $data)
     {
         $this->referenceRepositoryData = $data;
