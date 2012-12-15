@@ -1,3 +1,5 @@
+
+
 <?php
 
 namespace Doctrine\Common\Tester;
@@ -20,6 +22,7 @@ use Doctrine\Common\DataFixtures\ReferenceRepository;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
 use Doctrine\DBAL\Types\Type;
+use Doctrine\Common\Tester\DataFixture\ReferenceRepositorySerializer;
 
 class Tester
 {    
@@ -45,6 +48,8 @@ class Tester
 
     protected $mappingTypes = array();
     
+    protected $referenceRepositoryData = array();
+
     public function __construct()
     {
         $this->useSqlite();
@@ -100,6 +105,7 @@ class Tester
     {
         if (false == $this->em) {
             $this->em = $this->initEm();
+            $this->referenceRepository = null;
         }
         
         return $this->em;
@@ -161,6 +167,8 @@ class Tester
     public function useEm(EntityManager $em)
     {
         $this->em = $em;
+
+        $this->referenceRepository = null;
         
         return $this;
     }
@@ -231,10 +239,10 @@ class Tester
         return $this->fixtureManager;
     }
 
-    public function referenceRepository()
+    protected function referenceRepository()
     {
         if (false == $this->referenceRepository) {
-            $this->referenceRepository = $this->initReferenceRepository();
+            $this->initReferenceRepository();
         }
 
         return $this->referenceRepository;
@@ -242,13 +250,12 @@ class Tester
 
     protected function initReferenceRepository()
     {
-        return new ReferenceRepository($this->em());
+        $this->referenceRepository = new ReferenceRepository($this->em);
     }
 
-    public function renewReferenceRepository()
+    public function setReferenceRepositoryData(array $data)
     {
-        $this->referenceRepository = null;
-        $this->referenceRepository();
+        $this->referenceRepositoryData = $data;
     }
     
     protected function guessPath($originalPath)
@@ -292,6 +299,18 @@ class Tester
 
     public function get($referenceName)
     {
+        //load references lazily
+        if (false == $this->referenceRepository()->hasReference($referenceName)) {
+            if (isset($this->referenceRepositoryData[$referenceName])) {
+                $reference = $this->em()->getReference(
+                    $this->referenceRepositoryData[$referenceName]['class'],
+                    $this->referenceRepositoryData[$referenceName]['identifier']
+                );
+
+                $this->referenceRepository()->setReference($referenceName, $reference);
+            }
+        }
+        
         return $this->referenceRepository()->getReference($referenceName);
     }
 }
