@@ -280,7 +280,7 @@ class Tester
     
     /**
          *
-         * @return Doctrine\ORM\EntityRepository
+         * @return \Doctrine\ORM\EntityRepository
          */
     public function repository($entity)
     {
