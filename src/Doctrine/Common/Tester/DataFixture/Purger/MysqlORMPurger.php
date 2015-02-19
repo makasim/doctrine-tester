@@ -2,14 +2,14 @@
 
 namespace Doctrine\Common\Tester\DataFixture\Purger;
 
-use Doctrine\ORM\EntityManager;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\ORM\EntityManagerInterface;
 
 class MysqlORMPurger extends ORMPurger
 {
     private $em;
 
-    public function setEntityManager(EntityManager $em)
+    public function setEntityManager(EntityManagerInterface $em)
     {
         $this->em = $em;
         parent::setEntityManager($em);
